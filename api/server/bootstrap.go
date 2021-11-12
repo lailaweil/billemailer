@@ -6,6 +6,7 @@ import (
 
 func bootstrap(router *mux.Router)  {
 	billController := resolveBillController()
+	templateController := resolveTemplateController()
 
-	mapUrls(router, billController)
+	mapUrls(router, billController, templateController)
 }
