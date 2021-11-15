@@ -1,46 +1,55 @@
 package services
 
 import (
+	"fmt"
+	"github.com/lailaweil/billemailer/api/dao"
 	"github.com/lailaweil/billemailer/api/domain"
 	"github.com/lailaweil/billemailer/api/errors"
-	"log"
-	"os"
-	textTemplate "text/template"
+	"net/http"
 )
 
 type TemplateService interface {
-	CreateTemplate(template domain.Template) *errors.Error
+	CreateTemplate(template *domain.Template) (*domain.Template, *errors.Error)
+	GetTemplate(id string) (*domain.Template, *errors.Error)
 }
 
 type templateService struct {
-	//TODO: Database
+	Container dao.DBConnection
 }
 
 func NewTemplateService() *templateService {
-	return &templateService{}
+	service := &templateService{
+		Container: dao.NewDBConnection(&dao.PostgresConnection{}),
+	}
+
+	service.Container.Connect()
+
+	return service
 }
 
-func (t templateService) CreateTemplate(template domain.Template) *errors.Error {
-	type Bill struct {
-		Date, Sum, Reason, Name string
-	}
-	
-	var bill = Bill{
-		Date:   "10/11/2021",
-		Sum:    "10055,6",
-		Reason: "Expensas Septiembre 2020",
-		Name:   "Laila Weil",
-	}
-	// Create a new template and parse the body into it.
-	email := textTemplate.Must(textTemplate.New("email").Parse(template.Body))
+func (t templateService) CreateTemplate(template *domain.Template) (*domain.Template, *errors.Error) {
+	_, err := t.Container.Insert(template)
 
-	// Execute the template for each bill.
-	err := email.Execute(os.Stdout, bill)
 	if err != nil {
-		log.Println("executing template:", err)
+		fmt.Errorf("error inserting template %s", err.Error())
+		return nil, errors.NewError(http.StatusInternalServerError, "error inserting template", err.Error())
 	}
 
-	return nil
+	return template, nil
 }
 
+func (t templateService) GetTemplate(id string) (*domain.Template, *errors.Error) {
+	var template domain.Template
+	err := t.Container.Get(id, &template)
 
+	if err != nil {
+		fmt.Errorf("error getting template %s", err.Error())
+		return nil, errors.NewError(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), err.Error())
+	}
+
+	if template.ID == 0 {
+		return nil, errors.NewError(http.StatusNotFound, http.StatusText(http.StatusNotFound), "no template found")
+	}
+
+	return &template, nil
+}

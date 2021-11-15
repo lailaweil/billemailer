@@ -3,21 +3,22 @@ package domain
 import "errors"
 
 type Template struct {
-	ID string `json:"id,omitempty"`
-	Body string `json:"body"`
-	Subject string `json:"subject"`
+	tableName struct{} `pg:"template"`
+	ID        int      `json:"id,omitempty" pg:"id,pk"`
+	Body      string   `json:"body" pg:"body"`
+	Subject   string   `json:"subject" pg:"subject"`
 }
 
 func (t Template) Validate() error {
-	if t.ID != ""{
+	if t.ID != 0 {
 		return errors.New("id must be empty")
 	}
 
-	if t.Subject == ""{
+	if t.Subject == "" {
 		return errors.New("subject can't be empty")
 	}
 
-	if t.Body == ""{
+	if t.Body == "" {
 		return errors.New("body can't be empty")
 	}
 
