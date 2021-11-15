@@ -29,11 +29,25 @@ func (r *PostgresConnection) Connect() {
 }
 
 func (r *PostgresConnection) Insert(entity interface{}) (interface{}, error) {
-	// Executing SQL query for insertion
 	return r.instance.Model(entity).Insert()
 }
 
-func (r *PostgresConnection) Get(id string, entity interface{}) error {
-	// Executing query for single row
-	return r.instance.Model(entity).Where(fmt.Sprintf("id = %s", id)).Select()
+func (r *PostgresConnection) Get(id string, entity interface{}) (bool, error) {
+	query := r.instance.Model(entity).Where("id = ?0", id)
+	exists, _ := query.Exists()
+	return exists, query.Select()
+}
+
+func (r *PostgresConnection) GetAll(entity interface{}) error {
+	return r.instance.Model(entity).Select()
+}
+
+func (r *PostgresConnection) Update(entity interface{}) (interface{}, error) {
+	return r.instance.Model(entity).WherePK().Update()
+}
+
+func (r *PostgresConnection) Delete(entity interface{}, id string) (interface{}, error) {
+	query := r.instance.Model(entity).Where("id = ?0", id)
+	query.Select()
+	return query.Delete()
 }

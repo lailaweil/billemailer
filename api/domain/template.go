@@ -10,10 +10,6 @@ type Template struct {
 }
 
 func (t Template) Validate() error {
-	if t.ID != 0 {
-		return errors.New("id must be empty")
-	}
-
 	if t.Subject == "" {
 		return errors.New("subject can't be empty")
 	}

@@ -3,7 +3,10 @@ package dao
 type GenericDB interface {
 	Connect()
 	Insert(entity interface{}) (interface{}, error)
-	Get(id string, entity interface{}) error
+	Update(entity interface{}) (interface{}, error)
+	Get(id string, entity interface{}) (bool, error)
+	GetAll(entity interface{}) error
+	Delete(entity interface{}, id string) (interface{}, error)
 }
 
 type DBConnection struct {

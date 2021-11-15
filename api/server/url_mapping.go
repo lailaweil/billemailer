@@ -37,4 +37,7 @@ func mapTemplateHandlers(r *mux.Router, c controllers.TemplateController) {
 	r.Methods(DELETE).Path("/template/{id:[0-9]+}").HandlerFunc(c.DeleteTemplate)
 
 	r.Methods(GET).Path("/template/{id:[0-9]+}").HandlerFunc(c.GetTemplate)
+
+	r.Methods(GET).Path("/templates").HandlerFunc(c.GetAllTemplate)
+
 }
