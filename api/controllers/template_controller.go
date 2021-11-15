@@ -23,9 +23,9 @@ func NewTemplateController(service services.TemplateService) TemplateController 
 //CreateTemplate creates a Template
 func (c TemplateController) CreateTemplate(w http.ResponseWriter, r *http.Request) {
 	// Declare a new Template.
-	template := &domain.Template{}
+	template := domain.Template{}
 
-	if err := json.NewDecoder(r.Body).Decode(template); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&template); err != nil {
 		errResponse := errors.NewError(http.StatusBadRequest, "error decoding body", err.Error())
 		utils.WriteResponse(w, errResponse, errResponse.Status)
 		return
@@ -44,7 +44,7 @@ func (c TemplateController) CreateTemplate(w http.ResponseWriter, r *http.Reques
 	}
 
 	//CreateTemplate
-	result, errCreate := c.service.CreateTemplate(template)
+	result, errCreate := c.service.CreateTemplate(&template)
 
 	if errCreate != nil {
 		utils.WriteResponse(w, errCreate, errCreate.Status)
@@ -56,9 +56,9 @@ func (c TemplateController) CreateTemplate(w http.ResponseWriter, r *http.Reques
 
 //UpdateTemplate updates a given Template
 func (c TemplateController) UpdateTemplate(w http.ResponseWriter, r *http.Request) {
-	template := &domain.Template{}
+	template := domain.Template{}
 
-	if err := json.NewDecoder(r.Body).Decode(template); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&template); err != nil {
 		errResponse := errors.NewError(http.StatusBadRequest, "error decoding body", err.Error())
 		utils.WriteResponse(w, errResponse, errResponse.Status)
 		return
@@ -70,7 +70,7 @@ func (c TemplateController) UpdateTemplate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	result, errUpdate := c.service.UpdateTemplate(template)
+	result, errUpdate := c.service.UpdateTemplate(&template)
 
 	if errUpdate != nil {
 		utils.WriteResponse(w, errUpdate, errUpdate.Status)

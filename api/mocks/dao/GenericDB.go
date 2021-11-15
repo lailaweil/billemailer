@@ -37,20 +37,27 @@ func (_m *GenericDB) Delete(entity interface{}, id string) (interface{}, error) 
 	return r0, r1
 }
 
-// Get provides a mock function with given fields: id, entity
-func (_m *GenericDB) Get(id string, entity interface{}) (bool, error) {
-	ret := _m.Called(id, entity)
+// Get provides a mock function with given fields: id, entity, preload
+func (_m *GenericDB) Get(id string, entity interface{}, preload ...string) (bool, error) {
+	_va := make([]interface{}, len(preload))
+	for _i := range preload {
+		_va[_i] = preload[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, id, entity)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, interface{}) bool); ok {
-		r0 = rf(id, entity)
+	if rf, ok := ret.Get(0).(func(string, interface{}, ...string) bool); ok {
+		r0 = rf(id, entity, preload...)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, interface{}) error); ok {
-		r1 = rf(id, entity)
+	if rf, ok := ret.Get(1).(func(string, interface{}, ...string) error); ok {
+		r1 = rf(id, entity, preload...)
 	} else {
 		r1 = ret.Error(1)
 	}

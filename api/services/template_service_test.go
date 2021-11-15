@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	errors2 "errors"
+	"fmt"
 	"github.com/lailaweil/billemailer/api/dao"
 	"github.com/lailaweil/billemailer/api/domain"
 	"github.com/lailaweil/billemailer/api/errors"
@@ -64,9 +65,9 @@ func TestTemplateService_GetTemplate(t *testing.T) {
 		result, err := service.GetTemplate(c.id)
 
 		if c.err != nil {
-			assert.Equal(t, c.err, err)
+			assert.Equal(t, c.err, err, fmt.Sprintf("CASE:%s", c.name))
 		} else {
-			assert.Equal(t, c.result, result)
+			assert.Equal(t, c.result, result, fmt.Sprintf("CASE:%s", c.name))
 		}
 
 		mockDB.AssertExpectations(t)
@@ -76,14 +77,14 @@ func TestTemplateService_GetTemplate(t *testing.T) {
 func TestTemplateService_GetAllTemplates(t *testing.T) {
 	cases := []struct {
 		name   string
-		result []domain.Template
+		result []*domain.Template
 		err    *errors.Error
 		errDB  error
 	}{
 		{
 			name: "OK",
-			result: []domain.Template{
-				{
+			result: []*domain.Template{
+				&domain.Template{
 					ID:      1,
 					Body:    "test template body",
 					Subject: "test template subject",
@@ -92,13 +93,13 @@ func TestTemplateService_GetAllTemplates(t *testing.T) {
 		},
 		{
 			name:   "NOT_FOUND",
-			result: []domain.Template{},
+			result: []*domain.Template{},
 			err:    errors.NewError(http.StatusNotFound, http.StatusText(http.StatusNotFound), "no templates found"),
 			errDB:  nil,
 		},
 		{
 			name:   "ERR_DB",
-			result: []domain.Template{},
+			result: []*domain.Template{},
 			err:    errors.NewError(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "err db"),
 			errDB:  errors2.New("err db"),
 		},
@@ -119,9 +120,9 @@ func TestTemplateService_GetAllTemplates(t *testing.T) {
 		result, err := service.GetAllTemplates()
 
 		if c.err != nil {
-			assert.Equal(t, c.err, err)
+			assert.Equal(t, c.err, err, fmt.Sprintf("CASE:%s", c.name))
 		} else {
-			assert.Equal(t, c.result, result)
+			assert.Equal(t, c.result, result, fmt.Sprintf("CASE:%s", c.name))
 		}
 
 		mockDB.AssertExpectations(t)
@@ -131,13 +132,13 @@ func TestTemplateService_GetAllTemplates(t *testing.T) {
 func TestTemplateService_CreateTemplate(t *testing.T) {
 	cases := []struct {
 		name     string
-		template *domain.Template
+		template domain.Template
 		err      *errors.Error
 		errDB    error
 	}{
 		{
 			name: "OK",
-			template: &domain.Template{
+			template: domain.Template{
 				ID:      1,
 				Body:    "test template body",
 				Subject: "test template subject",
@@ -145,7 +146,7 @@ func TestTemplateService_CreateTemplate(t *testing.T) {
 		},
 		{
 			name:     "ERR",
-			template: nil,
+			template: domain.Template{},
 			err:      errors.NewError(http.StatusInternalServerError, "error inserting template", "err db"),
 			errDB:    errors2.New("err db"),
 		},
@@ -156,21 +157,20 @@ func TestTemplateService_CreateTemplate(t *testing.T) {
 
 		mockDB := new(mocks.GenericDB)
 		mockDB.On("Insert", mock.Anything).Run(func(args mock.Arguments) {
-			if c.template != nil {
+			if c.template.ID == 0 {
 				bytes, _ := json.Marshal(c.template)
 				json.Unmarshal(bytes, args.Get(0))
 			}
 		}).Return(c.template, c.errDB)
 		service.Container = dao.NewDBConnection(mockDB)
 
-		result, err := service.CreateTemplate(c.template)
+		result, err := service.CreateTemplate(&c.template)
 
 		if c.err != nil {
-			assert.Equal(t, c.err, err)
+			assert.Equal(t, c.err, err, fmt.Sprintf("CASE:%s", c.name))
 		} else {
-			assert.Equal(t, c.template, result)
+			assert.Equal(t, &c.template, result, fmt.Sprintf("CASE:%s", c.name))
 		}
 
-		mockDB.AssertExpectations(t)
 	}
 }

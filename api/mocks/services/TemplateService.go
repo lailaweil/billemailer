@@ -65,15 +65,15 @@ func (_m *TemplateService) DeleteTemplate(id string) (*domain.Template, *errors.
 }
 
 // GetAllTemplates provides a mock function with given fields:
-func (_m *TemplateService) GetAllTemplates() ([]domain.Template, *errors.Error) {
+func (_m *TemplateService) GetAllTemplates() ([]*domain.Template, *errors.Error) {
 	ret := _m.Called()
 
-	var r0 []domain.Template
-	if rf, ok := ret.Get(0).(func() []domain.Template); ok {
+	var r0 []*domain.Template
+	if rf, ok := ret.Get(0).(func() []*domain.Template); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.Template)
+			r0 = ret.Get(0).([]*domain.Template)
 		}
 	}
 

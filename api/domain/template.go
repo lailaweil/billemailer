@@ -1,12 +1,14 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+)
 
 type Template struct {
-	tableName struct{} `pg:"template"`
-	ID        int      `json:"id,omitempty" pg:"id,pk"`
-	Body      string   `json:"body" pg:"body"`
-	Subject   string   `json:"subject" pg:"subject"`
+	ID      uint     `json:"id" gorm:"primaryKey" `
+	Body    string   `json:"body" `
+	Subject string   `json:"subject"`
+	Folders []Folder `gorm:"ForeignKey:DefaultTemplateID"`
 }
 
 func (t Template) Validate() error {

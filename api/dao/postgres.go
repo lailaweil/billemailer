@@ -1,53 +1,60 @@
 package dao
 
 import (
+	"errors"
 	"fmt"
-	"github.com/go-pg/pg/v10"
-	"os"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PostgresConnection struct {
-	instance *pg.DB
+	instance   *gorm.DB
+	connString string
+}
+
+func NewPostgresDB(host, port, user, password, dbname string) *PostgresConnection {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, password, dbname, port)
+	return &PostgresConnection{
+		connString: dsn,
+	}
 }
 
 func (r *PostgresConnection) Connect() {
 	if r.instance == nil {
-		address := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
-		options := &pg.Options{
-			User:     os.Getenv("USER"),
-			Password: os.Getenv("PASSWORD"),
-			Addr:     address,
-			Database: os.Getenv("DB_NAME"),
-			PoolSize: 50,
-		}
-		con := pg.Connect(options)
-		if con == nil {
+		db, err := gorm.Open(postgres.Open(r.connString), &gorm.Config{})
+		if err != nil {
 			fmt.Errorf("cannot connect to postgres")
 		}
-		r.instance = con
+		r.instance = db
 	}
 }
 
 func (r *PostgresConnection) Insert(entity interface{}) (interface{}, error) {
-	return r.instance.Model(entity).Insert()
+	result := r.instance.Create(entity)
+	return result, result.Error
 }
 
-func (r *PostgresConnection) Get(id string, entity interface{}) (bool, error) {
-	query := r.instance.Model(entity).Where("id = ?0", id)
-	exists, _ := query.Exists()
-	return exists, query.Select()
+func (r *PostgresConnection) Get(id string, entity interface{}, preload ...string) (bool, error) {
+	var result *gorm.DB
+	if len(preload) != 0 {
+		result = r.instance.Preload(preload[0]).First(entity, id)
+	} else {
+		result = r.instance.First(entity, id)
+	}
+	return !errors.Is(result.Error, gorm.ErrRecordNotFound), result.Error
 }
 
 func (r *PostgresConnection) GetAll(entity interface{}) error {
-	return r.instance.Model(entity).Select()
+	return r.instance.Find(entity).Error
 }
 
 func (r *PostgresConnection) Update(entity interface{}) (interface{}, error) {
-	return r.instance.Model(entity).WherePK().Update()
+	result := r.instance.Save(entity)
+	return result, result.Error
 }
 
 func (r *PostgresConnection) Delete(entity interface{}, id string) (interface{}, error) {
-	query := r.instance.Model(entity).Where("id = ?0", id)
-	query.Select()
-	return query.Delete()
+	result := r.instance.Clauses(clause.Returning{}).Delete(entity, id)
+	return result, result.Error
 }

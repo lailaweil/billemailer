@@ -11,7 +11,7 @@ import (
 type TemplateService interface {
 	CreateTemplate(template *domain.Template) (*domain.Template, *errors.Error)
 	GetTemplate(id string) (*domain.Template, *errors.Error)
-	GetAllTemplates() ([]domain.Template, *errors.Error)
+	GetAllTemplates() ([]*domain.Template, *errors.Error)
 	UpdateTemplate(newTemplate *domain.Template) (*domain.Template, *errors.Error)
 	DeleteTemplate(id string) (*domain.Template, *errors.Error)
 }
@@ -20,9 +20,9 @@ type templateService struct {
 	Container dao.DBConnection
 }
 
-func NewTemplateService() *templateService {
+func NewTemplateService(container dao.DBConnection) *templateService {
 	service := &templateService{
-		Container: dao.NewDBConnection(&dao.PostgresConnection{}),
+		Container: container,
 	}
 
 	service.Container.Connect()
@@ -57,8 +57,8 @@ func (t templateService) GetTemplate(id string) (*domain.Template, *errors.Error
 	return &template, nil
 }
 
-func (t templateService) GetAllTemplates() ([]domain.Template, *errors.Error) {
-	var templates []domain.Template
+func (t templateService) GetAllTemplates() ([]*domain.Template, *errors.Error) {
+	var templates []*domain.Template
 	err := t.Container.GetAll(&templates)
 
 	if err != nil {

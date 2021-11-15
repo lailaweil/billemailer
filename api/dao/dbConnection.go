@@ -4,7 +4,7 @@ type GenericDB interface {
 	Connect()
 	Insert(entity interface{}) (interface{}, error)
 	Update(entity interface{}) (interface{}, error)
-	Get(id string, entity interface{}) (bool, error)
+	Get(id string, entity interface{}, preload ...string) (bool, error)
 	GetAll(entity interface{}) error
 	Delete(entity interface{}, id string) (interface{}, error)
 }

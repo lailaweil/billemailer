@@ -12,9 +12,12 @@ const (
 	PUT    = "PUT"
 )
 
-func mapUrls(router *mux.Router, billController controllers.BillController, templateController controllers.TemplateController) {
+func mapUrls(router *mux.Router, billController controllers.BillController, templateController controllers.TemplateController,
+	folderController controllers.FolderController) {
 	mapBillHandlers(router, billController)
 	mapTemplateHandlers(router, templateController)
+	mapFolderHandlers(router, folderController)
+
 }
 
 func mapBillHandlers(r *mux.Router, c controllers.BillController) {
@@ -39,5 +42,13 @@ func mapTemplateHandlers(r *mux.Router, c controllers.TemplateController) {
 	r.Methods(GET).Path("/template/{id:[0-9]+}").HandlerFunc(c.GetTemplate)
 
 	r.Methods(GET).Path("/templates").HandlerFunc(c.GetAllTemplate)
+
+}
+
+func mapFolderHandlers(r *mux.Router, c controllers.FolderController) {
+
+	r.Methods(POST).Path("/folder").HandlerFunc(c.CreateFolder)
+
+	r.Methods(GET).Path("/folder/{id:[0-9]+}").HandlerFunc(c.GetFolder)
 
 }
